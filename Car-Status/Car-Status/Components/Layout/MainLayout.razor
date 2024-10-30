@@ -1,0 +1,76 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main >
+        <!-- Updated top row with title, timer, and logout button -->
+        <div class="top-row navbar bg-black navbar-dark">
+            <div class="container-fluid d-flex justify-content-between align-items-center">
+                <span class="navbar-title">Dashboard</span>
+
+                <div class="navbar-right d-flex align-items-center">
+                    <span class="timer">29 min. 47 sec.</span>
+                    <button class="btn btn-sm btn-outline-light ms-3" @onclick="Logout">Logout</button>
+                </div>
+            </div>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+<style>
+    .top-row {
+        width: 100%;
+        background-color: black;
+        color: white;
+        padding: 0.75rem 1rem;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+
+    .navbar-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .timer {
+        font-size: 1rem;
+        margin-right: 1rem;
+    }
+
+    .btn-outline-light {
+        color: white;
+        border: 1px solid white;
+    }
+
+    .btn-outline-light:hover {
+        color: #2c3e50;
+        background-color: white;
+    }
+
+    .sidebar {
+        width: 250px;
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem 0;
+        height: 100vh;
+        position: fixed;
+        top: 60px; /* Aligns sidebar below fixed header */
+        left: 0;
+    }
+</style>
+
+@code {
+    private void Logout()
+    {
+        // Implement logout functionality
+    }
+}

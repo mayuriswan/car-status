@@ -1,0 +1,368 @@
+﻿@page "/car-status"
+@page "/car-status/{CarId}"
+@using Radzen
+@using Radzen.Blazor
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+
+<PageTitle>Dashboard</PageTitle>
+
+<RadzenRow Class="full-height">
+    <!-- Left Column (Masterdata, Inventory, and KPI) -->
+    <RadzenColumn Size="12" SizeMD="3">
+        <!-- Masterdata Card -->
+        <RadzenCard Class="radzen-card styled-card">
+            <div class="header-with-icon">
+                <RadzenIcon Icon="info" Style="font-size: 1.2rem; margin-right: 0.5rem;" />
+                <RadzenText TextStyle="TextStyle.H6" Radzen.Blazor.TagName="h3">CAR ID</RadzenText>
+            </div>
+            <RadzenStack>
+                <RadzenText>Car: @CarId</RadzenText>
+                <RadzenText>Location: City Center</RadzenText>
+                <RadzenText>Contact Person: John Volt</RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+
+        <!-- Inventory Card -->
+        <RadzenCard Class="radzen-card styled-card">
+            <div class="header-with-icon">
+                <RadzenIcon Icon="inventory" Style="font-size: 1.2rem; margin-right: 0.5rem;" />
+                <RadzenText TextStyle="TextStyle.H6" Radzen.Blazor.TagName="h3">Inventory</RadzenText>
+            </div>
+            <RadzenStack class="single-space">
+                <RadzenText>Customer: Eco Motors Inc.</RadzenText>
+                <RadzenText>Terminal Name: Charger-X1</RadzenText>
+                <RadzenText>IP Address: 192.168.1.100</RadzenText>
+                <RadzenText>Last Scan: @DateTime.Now.AddHours(-2).ToString("g")</RadzenText>
+                <RadzenText>MAC Address: 00:1B:44:11:3A:B7</RadzenText>
+                <RadzenText>Operating System: Car OS 2.0</RadzenText>
+                <RadzenText>State: NORMAL</RadzenText>
+                <RadzenText>Time Zone: America/New_York</RadzenText>
+            </RadzenStack>
+        </RadzenCard>
+        <!-- KPI Chart Card -->
+    </RadzenColumn>
+
+    <!-- Center Column (Status Details) -->
+    <RadzenColumn Size="12" SizeMD="4">
+        <RadzenCard Class="status-details-card">
+            <div class="header-with-icon">
+                <RadzenIcon Icon="report" Style="font-size: 1.2rem; margin-right: 0.5rem;" />
+                <RadzenText TextStyle="TextStyle.H6" Radzen.Blazor.TagName="h3">Status Details</RadzenText>
+            </div>
+            <RadzenText TextStyle="TextStyle.Body2">General Status: ✅ No Issues</RadzenText>
+            <RadzenText TextStyle="TextStyle.Body2">Status Time: @DateTime.Now.ToString("g")</RadzenText>
+
+            <!-- Hardware Section -->
+            <RadzenText TextStyle="TextStyle.H6" Class="section-header">Hardware</RadzenText>
+            <RadzenDataList Data="@statusDetails.Where(d => d.Category == "Hardware")" TItem="StatusDetail" Class="status-table">
+                <Template Context="detail">
+                    <div class="status-table-row">
+                        <RadzenIcon Icon="@(detail.Status ? "check_circle" : "cancel")"
+                                    IconColor="@(detail.Status ? "var(--rz-success)" : "var(--rz-danger)")"
+                                    Style="font-size: 1rem; margin-right: 0.5rem;" />
+                        <span>@detail.Name</span>
+                    </div>
+                </Template>
+            </RadzenDataList>
+
+            <!-- Software Section -->
+            <RadzenText TextStyle="TextStyle.H6" Class="section-header">Software</RadzenText>
+            <RadzenDataList Data="@statusDetails.Where(d => d.Category == "Software")" TItem="StatusDetail" Class="status-table">
+                <Template Context="detail">
+                    <div class="status-table-row">
+                        <RadzenIcon Icon="@(detail.Status ? "check_circle" : "cancel")"
+                                    IconColor="@(detail.Status ? "var(--rz-success)" : "var(--rz-danger)")"
+                                    Style="font-size: 1rem; margin-right: 0.5rem;" />
+                        <span>@detail.Name</span>
+                    </div>
+                </Template>
+            </RadzenDataList>
+        </RadzenCard>
+    </RadzenColumn>    <!-- Right Column (Tickets and Notes) -->
+    <RadzenColumn Size="8" SizeMD="5">
+        <!-- Tickets Card -->
+        <RadzenCard Class="radzen-card styled-card">
+            <div class="header-with-icon">
+                <RadzenIcon Icon="list" Style="font-size: 1.2rem; margin-right: 0.5rem;" />
+                <RadzenText TextStyle="TextStyle.H6" Radzen.Blazor.TagName="h3">Tickets</RadzenText>
+            </div>
+            <RadzenDataList Data="@tickets" TItem="Ticket">
+                <Template Context="ticket">
+                    <div>
+                        <RadzenText TextStyle="TextStyle.Body1">
+                            <strong>@ticket.Date.ToString("g")</strong> - @ticket.Status
+                        </RadzenText>
+                        <RadzenText TextStyle="TextStyle.Caption">@ticket.Details</RadzenText>
+                    </div>
+                </Template>
+            </RadzenDataList>
+        </RadzenCard>
+
+        <!-- Notes Card -->
+        <RadzenCard Class="radzen-card styled-card">
+            <div class="header-with-icon">
+                <RadzenIcon Icon="notes" Style="font-size: 1.2rem; margin-right: 0.5rem;" />
+                <RadzenText TextStyle="TextStyle.H6" Radzen.Blazor.TagName="h3">Notes</RadzenText>
+            </div>
+            <RadzenTextArea Rows="5" @bind-Value="notes" Class="notes-textarea" />
+        </RadzenCard>
+        <RadzenCard Class="radzen-card styled-card">
+            <div class="header-with-icon">
+                <RadzenIcon Icon="bar_chart" Style="font-size: 1.2rem; margin-right: 0.5rem;" />
+                <RadzenText TextStyle="TextStyle.H6" Radzen.Blazor.TagName="h3">KPI</RadzenText>
+            </div>
+            <RadzenChart Class="kpi-chart" Style="height: 300px;">
+                <RadzenLineSeries Data="@kpiData" CategoryProperty="Date" ValueProperty="Value" Title="Battery Health" />
+                <RadzenCategoryAxis Padding="20" FormatString="{0:MM/dd}" />
+                <RadzenValueAxis>
+                    <RadzenGridLines Visible="true" />
+                    <RadzenAxisTitle Text="Percentage" />
+                </RadzenValueAxis>
+            </RadzenChart>
+        </RadzenCard>
+
+      
+      
+    </RadzenColumn>
+</RadzenRow>
+
+<style>
+     /* Full viewport height for the RadzenRow */
+    .full-height {
+        height: 100vh;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    /* Flex layout for columns */
+    .column-style {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    /* Allow cards to expand to fill available height */
+    .styled-card {
+        flex: 1;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        padding: 1rem;
+        overflow: auto;
+    }
+
+    /* Status card adjustments for visual consistency */
+    .status-details-card {
+        border: 1px solid #d3d3d3;
+        padding: 1rem;
+        background-color: white;
+    }
+
+   
+    .styled-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        margin-bottom: 1rem;
+        padding: 1rem;
+    }
+
+    .header-with-icon {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .apollo-status-item-compact {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+
+    .status-details-card {
+        border: 1px solid #d3d3d3;
+        padding: 0.1rem;
+        border-radius: 4px;
+        background-color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .header-with-icon {
+        display: flex;
+        align-items: center;
+        font-size: 1rem;
+        font-weight: bold;
+        color: #0056b3;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid #d3d3d3;
+        padding-bottom: 0.5rem;
+    }
+    /* Styling the main card */
+    .status-details-card {
+        border: 1px solid #d3d3d3;
+        padding: 1rem;
+        border-radius: 4px;
+        background-color: white;
+    }
+
+    /* Styling for the header */
+    .header-with-icon {
+        display: flex;
+        align-items: center;
+        font-size: 1rem;
+        font-weight: bold;
+        color: #0056b3;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid #d3d3d3;
+        padding-bottom: 0.5rem;
+    }
+
+    /* Section headers for Hardware and Software */
+    .section-header {
+        color: #0056b3;
+        font-weight: bold;
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Ensure RadzenDataList container looks like a table */
+    .status-table .rz-datalist-data {
+        list-style-type: none; /* Removes bullet points */
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        border-collapse: collapse;
+    }
+
+        /* Styling each list item to look like a row */
+        .status-table .rz-datalist-data li {
+            border-bottom: 1px solid #d3d3d3;
+            display: flex;
+            align-items: center;
+        }
+
+            /* Removing border from the last item */
+            .status-table .rz-datalist-data li:last-child {
+                border-bottom: none;
+            }
+
+    /* Styling each row's icon and text */
+    .status-table .status-table-row {
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+        .status-table .status-table-row .rzi {
+            font-size: 1rem;
+            margin-right: 0.5rem;
+        }
+
+        .status-table .status-table-row span {
+            margin-left: 0.5rem;
+        }
+
+</style>
+
+<style>
+    .styled-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        margin-bottom: 1rem;
+        padding: 1rem;
+    }
+
+    .header-with-icon {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .apollo-status-item-compact {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+   
+</style>
+
+
+
+
+@code {
+    [Parameter]
+    public string CarId { get; set; }
+    private string notes = "Vehicle performing well after recent maintenance. Schedule next check-up in 3 months.";
+    private string GetIcon(StatusDetail detail) => detail.Status ? "check_circle" : "cancel";
+    private string GetIconColor(StatusDetail detail) => detail.Status ? "var(--rz-success)" : "var(--rz-danger)";
+
+    private List<StatusDetail> statusDetails = new List<StatusDetail>
+    {
+        new StatusDetail { Name = "Battery", Status = true, Category = "Hardware" },
+        new StatusDetail { Name = "Radio", Status = true, Category = "Hardware" },
+        new StatusDetail { Name = "Transmission", Status = true, Category = "Hardware" },
+        new StatusDetail { Name = "Alternator", Status = false, Category = "Hardware" },
+        new StatusDetail { Name = "Fuel Pump", Status = true, Category = "Hardware" },
+        new StatusDetail { Name = "Coolant Temp", Status = true, Category = "Hardware" },
+        new StatusDetail { Name = "Tire Pressure", Status = true, Category = "Hardware" },
+        new StatusDetail { Name = "Alarm", Status = true, Category = "Hardware" },
+        new StatusDetail { Name = "LoJack", Status = true, Category = "Hardware" },
+        new StatusDetail { Name = "Terminal Software", Status = true, Category = "Software" },
+        new StatusDetail { Name = "Operator Mode", Status = true, Category = "Software" },
+        new StatusDetail { Name = "Access Protection", Status = false, Category = "Software" },
+        new StatusDetail { Name = "Hard Drive Encryption", Status = false, Category = "Software" },
+        new StatusDetail { Name = "Intrusion Protection", Status = false, Category = "Software" },
+        new StatusDetail { Name = "GPS Locator", Status = false, Category = "Software" },
+        new StatusDetail { Name = "Special Electronics", Status = true, Category = "Software" }
+    };
+
+    private List<Event> businessEvents = new List<Event>
+    {
+        new Event { Date = DateTime.Now.AddHours(-2), Description = "Maintenance Check", Details = "Routine inspection completed" },
+        new Event { Date = DateTime.Now.AddHours(-5), Description = "Battery Charged", Details = "Full charge cycle completed" },
+        new Event { Date = DateTime.Now.AddDays(-1), Description = "Software Update", Details = "Version 2.1 installed successfully" }
+    };
+
+    private List<Event> technicalEvents = new List<Event>
+    {
+        new Event { Date = DateTime.Now.AddMinutes(-30), Description = "Diagnostic Scan", Details = "No errors detected" },
+        new Event { Date = DateTime.Now.AddHours(-3), Description = "Tire Pressure Check", Details = "All tires at optimal pressure" },
+        new Event { Date = DateTime.Now.AddHours(-6), Description = "Battery Health Check", Details = "Battery at 95% capacity" }
+    };
+
+    private List<Ticket> tickets = new List<Ticket>
+    {
+        new Ticket { Date = DateTime.Now.AddDays(-2), Status = "Closed", Details = "Oil change completed" },
+        new Ticket { Date = DateTime.Now.AddDays(-5), Status = "Closed", Details = "Brake pad replacement" },
+        new Ticket { Date = DateTime.Now.AddHours(-1), Status = "Open", Details = "Check engine light investigation" }
+    };
+
+    private List<ChartData> kpiData =new List<ChartData>();
+
+    protected override void OnInitialized()
+    {
+        kpiData = new List<ChartData>
+        {
+            new ChartData { Date = DateTime.Now.AddDays(-6), Value = 92 },
+            new ChartData { Date = DateTime.Now.AddDays(-5), Value = 93 },
+            new ChartData { Date = DateTime.Now.AddDays(-4), Value = 95 },
+            new ChartData { Date = DateTime.Now.AddDays(-3), Value = 94 },
+            new ChartData { Date = DateTime.Now.AddDays(-2), Value = 96 },
+            new ChartData { Date = DateTime.Now.AddDays(-1), Value = 97 },
+            new ChartData { Date = DateTime.Now, Value = 95 }
+        };
+    }
+
+    public class StatusDetail { public string Name { get; set; } public bool Status { get; set; } public string Category { get; set; } }
+    public class Event { public DateTime Date { get; set; } public string Description { get; set; } public string Details { get; set; } }
+    public class Ticket { public DateTime Date { get; set; } public string Status { get; set; } public string Details { get; set; } }
+    public class ChartData { public DateTime Date { get; set; } public double Value { get; set; } }
+
+}
